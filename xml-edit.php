@@ -10,8 +10,8 @@ $xmlTest3 = '
 ';
 
 $xml = $xmlTest3;
-$propToEdit = 4;
-$newValue = 7;
+$propToEdit = 1;
+$newValue = 0;
 
 $getAllTags = '/<\/?[A-Z]{1,} ?.*?\/?>/'; // busca todas as tags do XML
 $getGroundTags = '/<S .*?\/>/'; // busca as tags do XML que representam pisos (<S/>)
@@ -26,6 +26,9 @@ preg_match_all($getGroundIdType, $xml, $matchIdType);
 preg_match_all($getGroundRest, $xml, $matchGroundRest);
 
 $groundsNo = count($matchSTags[0]);
+
+echo "XML enviado:";
+displayXml($xml);
 
 for ($i = 0; $i < $groundsNo; $i++) {
   $isdyn    = $matchProps[1][$i];
@@ -77,16 +80,12 @@ for ($i = 0; $i < $groundsNo; $i++) {
   $xml = preg_replace($pattern, $replacement, $xml);
 
   if ($i + 1 == $groundsNo) {
-    echo "A propriedade dos pisos que determina $propName foi alterada para $newValue<br>";
-    echo "Quantidade de pisos editados: $groundsNo<hr>";
-
-    echo "XML enviado:";
-    displayXml($xml);
-
     echo "Novo XML: ";
     displayXml($xml);
   }
 }
+echo "<hr>A propriedade dos pisos que determina $propName foi alterada para $newValue<br>";
+echo "Quantidade de pisos editados: $groundsNo";
 
 echo "<style>*{font-family:sans-serif;}</style>";
 function displayXml($x){ // substitui os caracteres "<" e ">" para nao serem lidos como tags no navegador e possam ser imprimidos
