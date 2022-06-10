@@ -28,7 +28,7 @@
   </head>
   <form action="editor.php" method="POST">
     Código
-    <input required type="text" name="xml-code" id=""><br>
+    <input type="text" name="xml-code" id=""><br>
     Propriedade
     <select name="prop-name" id="" required>
       <option value="0">Se é dinâmico</option>
@@ -71,20 +71,28 @@
 </html>
 <?php
 function displayXml($x){
-  $edited = preg_replace('/<\?xml version="1.0"\?>/', '', $x);
-  $pattern = array('/(<)/', '/(>)/');
+  $withoutVersionTag = preg_replace('/<\?xml version="1.0"\?>/', '', $x);
+  $tagsPattern = array('/(<)/', '/(>)/');
   $replacement = array('&lt', '&gt');
-  echo preg_replace($pattern, $replacement, $edited);
+  echo preg_replace($tagsPattern, $replacement, $withoutVersionTag);
 };
 
-if (!is_null(@$_POST['xml-code']) && @$_POST['xml-code'] != "") {
-  $string = @$_POST['xml-code'];
+$string = @$_POST['xml-code'];
+if (is_null($string)){
+  echo "Insira o XML no campo \"Código\" <br>";
+}
 
-  $xml = @simplexml_load_string($string);
-  $sentCode = $xml->saveXML();
-  
+$xml = @simplexml_load_string($string);
+if ($xml === false && isset($string)){
+  echo "Código inválido";
+  if ($string == ""){
+    header('location: ');
+  }
+} else if ($xml){
   $propId = $_POST['prop-name'] ?? 3;
   $typeException = $_POST['type-exception'] ?? "";
+  
+  $sentCode = $xml->saveXML();
   
   for ($i = 0; $i < count($xml->Z->S->S); $i++) {
     $allProperties = $xml->Z->S->S[$i]->attributes()->P;
@@ -104,19 +112,21 @@ if (!is_null(@$_POST['xml-code']) && @$_POST['xml-code'] != "") {
       $xml->Z->S->S[$i]->attributes()->P = $newProps;
     }
   }
+
+  $editedCode = $xml->saveXML();
   
-  echo "<h4>Resultado:</h4>
+  echo "
+  <h4>Resultado:</h4>
   <div class='code-container'><code>";
-  echo displayXml($xml->saveXML());
+  displayXml($sentCode);
   echo "</code></div>";
   
-  echo "<h4>XML Enviado:</h4>
+  echo "
+  <h4>XML Enviado:</h4>
   <div class='code-container'><code>";
-  echo displayXml($sentCode);
+  displayXml($sentCode);
   echo "</code></div>";
 }
-
-
 
 // XML PARA TESTE:
 // <C><P MEDATA=";;;;-0;0:::1-"/><Z><S><S T="0" X="134" Y="392" L="230" H="109" P="0,0,0.3,0.2,0,0,0,0"/><S T="0" X="394" Y="378" L="125" H="93" P="0,0,0.3,0.2,0,0,0,0"/><S T="0" X="543" Y="376" L="90" H="78" P="0,0,0.3,0.2,0,0,0,0"/><S T="1" X="396" Y="25" L="776" H="28" P="0,0,0,0.2,0,0,0,0"/><S T="1" X="148" Y="-16" L="283" H="36" P="0,0,0,0.2,0,0,0,0"/><S T="1" X="562" Y="-20" L="422" H="39" P="0,0,0,0.2,0,0,0,0"/><S T="7" X="292" Y="385" L="76" H="102" P="0,0,0.1,0.2,0,0,0,0"/><S T="7" X="475" Y="376" L="52" H="86" P="0,0,0.1,0.2,0,0,0,0"/><S T="7" X="619" Y="381" L="55" H="96" P="0,0,0.1,0.2,0,0,0,0"/><S T="6" X="726" Y="373" L="154" H="62" P="0,0,0.3,0.2,0,0,0,0"/><S T="6" X="765" Y="187" L="66" H="305" P="0,0,0.3,0.2,0,0,0,0"/><S T="6" X="321" Y="-21" L="86" H="48" P="0,0,0.3,0.2,0,0,0,0"/><S T="3" X="123" Y="303" L="242" H="52" P="0,0,0,20,0,0,0,0"/><S T="3" X="387" Y="298" L="109" H="54" P="0,0,0,20,0,0,0,0"/><S T="3" X="287" Y="183" L="97" H="283" P="0,0,0,20,0,0,0,0"/><S T="8" X="113" Y="75" L="232" H="55" P="0,0,0.3,0.2,0,0,0,0" c="2"/><S T="8" X="391" Y="74" L="112" H="60" P="0,0,0.3,0.2,0,0,0,0" c="2"/><S T="8" X="583" Y="299" L="281" H="61" P="0,0,0.3,0.2,0,0,0,0" c="2"/><S T="2" X="32" Y="187" L="61" H="167" P="0,0,0,1.2,0,0,0,0"/><S T="2" X="191" Y="186" L="75" H="171" P="0,0,0,1.2,0,0,0,0"/><S T="2" X="367" Y="184" L="61" H="159" P="0,0,0,1.2,0,0,0,0"/><S T="10" X="107" Y="180" L="90" H="167" P="0,0,0.3,0,0,0,0,0"/><S T="10" X="421" Y="179" L="51" H="172" P="0,0,0.3,0,0,0,0,0"/><S T="10" X="586" Y="69" L="283" H="64" P="0,0,0.3,0,0,0,0,0"/><S T="19" X="483" Y="229" L="77" H="65" P="0,0,0.3,0,0,0,0,0"/><S T="19" X="674" Y="129" L="93" H="54" P="0,0,0.3,0,0,0,0,0"/><S T="19" X="282" Y="299" L="98" H="50" P="0,0,0.3,0,0,0,0,0"/><S T="12" X="535" Y="146" L="167" H="90" P="0,0,0.3,0.2,0,0,0,0" o="324650"/><S T="12" X="623" Y="235" L="197" H="71" P="0,0,0.3,0.2,0,0,0,0" o="324650"/><S T="12" X="675" Y="169" L="98" H="46" P="0,0,0.3,0.2,0,0,0,0" o="324650"/></S><D/><O/><L/></Z></C>
