@@ -4,6 +4,8 @@ session_start();
 $_SESSION['lastException'] = $typeException = $_POST['type-exception'] ?? $_SESSION['lastException'] ?? "";
 $_SESSION['lastProp'] = $propId = $_POST['prop-name'] ?? $_SESSION['lastProp'] ?? 4;
 $_SESSION['lastValue'] = $propValue = $_POST['prop-value'] ?? $_SESSION['lastValue'] ?? 45;
+$_SESSION['lastXml'] = $string = $_POST['xml-code'] ?? $_SESSION['lastXml'] ?? "";
+
 ?>
 
 <html>
@@ -34,9 +36,13 @@ $_SESSION['lastValue'] = $propValue = $_POST['prop-value'] ?? $_SESSION['lastVal
       }
     </style>
   </head>
-  <form action="editor.php" method="POST">
+  <form action="" method="POST">
     Código
-    <input type="text" name="xml-code" id=""><br>
+
+    <?php
+    echo "<input type='text' name='xml-code' id='' value='{$_SESSION['lastXml']}'>";
+    ?>
+    <br>
     Propriedade
     <select name="prop-name" id="" required>
 
@@ -89,21 +95,23 @@ function displayXml($x){
   $tagsPattern = array('/(<)/', '/(>)/');
   $replacement = array('&lt', '&gt');
   echo preg_replace($tagsPattern, $replacement, $withoutVersionTag);
-};
-
-$string = @$_POST['xml-code'];
-if (is_null($string)){
-  echo "Insira o XML no campo <b>Código</b> <br>";
+}
+function exist($var){
+  if (is_null($var) || $var == "" || !isset($var)) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
+if (!exist($string)){
+  echo "Insira o XML no campo <b>Código</b> <br>";
+}
 $xml = @simplexml_load_string($string);
-if ($xml === false && isset($string)){
+
+if (exist($string) && $xml == false){
   echo "Código inválido";
-  if ($string == ""){
-    header('location:');
-  }
 } else if ($xml){
-  
   $sentCode = $xml->saveXML();
   
   for ($i = 0; $i < count($xml->Z->S->S); $i++) {
