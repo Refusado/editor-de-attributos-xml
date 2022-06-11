@@ -76,10 +76,10 @@ $_SESSION['lastXml'] = $string = $_POST['xml-code'] ?? $_SESSION['lastXml'] ?? "
         "Madeira","Gelo","Trampolim","Lava","Chocolate","Terra","Grama","Areia","Nuvem","Água","Pedra","Grama com Neve","Retângulo","Circulo","Invisível","Teia de Aranha","Madeira2","Grama Laranja","Grama Rosa","Ácido"
       );
       for ($i = 0; $i < count($groundTypes); $i++) {
-        if ($i == $_SESSION['lastException']) {
-          echo "<option selected value='$i'> $i - $groundTypes[$i] </option>";
+        if ($i == $_SESSION['lastException'] && $_SESSION['lastException'] != "") {
+          echo "<option selected value='$i'>$groundTypes[$i] </option>";
         } else {
-          echo "<option value='$i'> $i - $groundTypes[$i] </option>";
+          echo "<option value='$i'>$groundTypes[$i] </option>";
         }
       }
       ?>
