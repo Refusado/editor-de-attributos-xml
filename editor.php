@@ -1,3 +1,11 @@
+<?php 
+session_start();
+
+$_SESSION['lastException'] = $typeException = $_POST['type-exception'] ?? $_SESSION['lastException'] ?? "";
+$_SESSION['lastProp'] = $propId = $_POST['prop-name'] ?? $_SESSION['lastProp'] ?? 4;
+$_SESSION['lastValue'] = $propValue = $_POST['prop-value'] ?? $_SESSION['lastValue'] ?? 45;
+?>
+
 <html>
   <head>
     <style>
@@ -17,7 +25,7 @@
         border: 1px solid #00000066;
         padding: 16px;
         width: fit-content;
-        margin: 0 auto;
+        margin: 0 auto 12px auto;
         text-align: end;
       }
       form input, form select {
@@ -31,44 +39,50 @@
     <input type="text" name="xml-code" id=""><br>
     Propriedade
     <select name="prop-name" id="" required>
-      <option value="0">Se é dinâmico</option>
-      <option value="1">Massa</option>
-      <option value="2">Fricção</option>
-      <option value="3" selected>Restituição</option>
-      <option value="4">Ângulo</option>
-      <option value="5">Se tem ângulo fixo</option>
-      <option value="6">Amortecimento linear</option>
-      <option value="7">Amortecimento angular</option>
+
+      <?php
+      $groundProps = array(
+        "Se é dinâmico","Massa","Fricção","Restituição","Ângulo","Se tem ângulo fixo","Amortecimento linear","Amortecimento angular"
+      );
+      for ($i = 0; $i < count($groundProps); $i++) {
+        if ($i == $_SESSION['lastProp']) {
+          echo "<option selected value='$i'>$groundProps[$i] </option>";
+        } else {
+          echo "<option value='$i'>$groundProps[$i] </option>";
+        }
+      }
+      ?>
+
     </select><br>
     Valor
-    <input type="number" name="prop-value" id="" value="1.2"><br>
+
+    <?php
+    echo "<input type='number' name='prop-value' id='' step='any' value='{$_SESSION['lastValue']}'>";
+    ?>
+    
+    <br>
     Ignorar
     <select name="type-exception" id="">
-      <option value=" ">Nenhum</option>
-      <option value="0"> 0 - Madeira </option>
-      <option value="1"> 1 - Gelo </option>
-      <option value="2"> 2 - Trampolim </option>
-      <option value="3"> 3 - Lava </option>
-      <option value="4"> 4 - Chocolate </option>
-      <option value="5"> 5 - Terra </option>
-      <option value="6"> 6 - Grama </option>
-      <option value="7"> 7 - Areia </option>
-      <option value="8" selected> 8 - Nuvem </option>
-      <option value="9"> 9 - Água </option>
-      <option value="10"> 10 - Pedra </option>
-      <option value="11"> 11 - Grama com Neve </option>
-      <option value="12"> 12 - Retângulo </option>
-      <option value="13"> 13 - Circulo </option>
-      <option value="14"> 14 - Invisível </option>
-      <option value="15"> 15 - Teia de Aranha </option>
-      <option value="16"> 16 - Madeira2 </option>
-      <option value="17"> 17 - Grama Laranja </option>
-      <option value="18"> 18 - Grama Rosa </option>
-      <option value="19"> 19 - Ácido </option>
+    <option selected value="">Nenhum</option>
+
+      <?php
+      $groundTypes = array(
+        "Madeira","Gelo","Trampolim","Lava","Chocolate","Terra","Grama","Areia","Nuvem","Água","Pedra","Grama com Neve","Retângulo","Circulo","Invisível","Teia de Aranha","Madeira2","Grama Laranja","Grama Rosa","Ácido"
+      );
+      for ($i = 0; $i < count($groundTypes); $i++) {
+        if ($i == $_SESSION['lastException']) {
+          echo "<option selected value='$i'> $i - $groundTypes[$i] </option>";
+        } else {
+          echo "<option value='$i'> $i - $groundTypes[$i] </option>";
+        }
+      }
+      ?>
+
     </select><br>
     <input type="submit" value="Enviar">
   </form>
 </html>
+
 <?php
 function displayXml($x){
   $withoutVersionTag = preg_replace('/<\?xml version="1.0"\?>/', '', $x);
@@ -79,18 +93,16 @@ function displayXml($x){
 
 $string = @$_POST['xml-code'];
 if (is_null($string)){
-  echo "Insira o XML no campo \"Código\" <br>";
+  echo "Insira o XML no campo <b>Código</b> <br>";
 }
 
 $xml = @simplexml_load_string($string);
 if ($xml === false && isset($string)){
   echo "Código inválido";
   if ($string == ""){
-    header('location: ');
+    header('location:');
   }
 } else if ($xml){
-  $propId = $_POST['prop-name'] ?? 3;
-  $typeException = $_POST['type-exception'] ?? "";
   
   $sentCode = $xml->saveXML();
   
@@ -103,10 +115,7 @@ if ($xml === false && isset($string)){
       for ($ii = 0; $ii < 8; $ii++) { 
         array_push($prop, $matches[0][$ii]);
       }
-  
-      if (!is_null(@$_POST['prop-value']) && @$_POST['prop-value'] != "") {
-        $prop[$propId] = $_POST['prop-value'];
-      }
+      $prop[$propId] = $propValue;
       
       $newProps = "$prop[0],$prop[1],$prop[2],$prop[3],$prop[4],$prop[5],$prop[6],$prop[7]" ;
       $xml->Z->S->S[$i]->attributes()->P = $newProps;
@@ -118,7 +127,7 @@ if ($xml === false && isset($string)){
   echo "
   <h4>Resultado:</h4>
   <div class='code-container'><code>";
-  displayXml($sentCode);
+  displayXml($editedCode);
   echo "</code></div>";
   
   echo "
